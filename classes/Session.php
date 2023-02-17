@@ -71,7 +71,8 @@ class Session
         if ($this->validate->checkErrorsValidate()) {
             $this->validatedArray = $this->validate->getValidatedArray($post, $validationArray);
         } else {
-            $this->error->maakError("validation");
+            $this->error->log->error($this->validate->returnErrorValidate());
+            $this->error->maakError("something went wrong with the validation");
         }
     }
 }

@@ -47,14 +47,14 @@
                 },
                 success: function(data) {
                     let parsedData = JSON.parse(data);
+                    console.log(parsedData);
                     switch (parsedData["succes"]) {
                         case "error":
                             $(messages).html(createErrorDiv(parsedData["msg"]));
 
                             break;
                         case "succes":
-                            window.location.href = parsedData["data"];
-
+                            console.log(parsedData["msg"]);
                             break;
                     }
                 },

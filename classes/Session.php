@@ -17,37 +17,31 @@ class Session
         session_start();
     }
 
-    public function createConfirmEmailSession(array $post): void
-    {
-        $useArray = array("email");
-        $this->validate($post, $useArray);
-        $_SESSION["email"] = $this->validatedArray["email"];
-    }
-
-    public function createMancalaSession(array $post): void
+    public function createUserSession(array $post): void
     {
         $useArray = array("idUser");
         $this->validate($post, $useArray);
         $_SESSION["idUser"] = $this->validatedArray["idUser"];
     }
 
-    public function checkExistsMancalaSession(): bool
+    public function createLevelSession(array $post): void
     {
-        if (isset($_SESSION["idUser"])) {
+        $useArray = array("level");
+        $this->validate($post, $useArray);
+        $_SESSION["level"] = $this->validatedArray["level"];
+    }
+
+    public function checkSessionExist(): bool
+    {
+        if (isset($_SESSION["idUser"]) && isset($_SESSION["level"])) {
             return true;
         }
         return false;
     }
 
-
-    public function deleteConfirmEmailSession(): void
+    public function checkSessionLevel(int $requiredLevel): bool
     {
-        unset($_SESSION['email']);
-    }
-
-    public function checkExistsEmailSession(): bool
-    {
-        if (isset($_SESSION["email"])) {
+        if ($_SESSION["level"] >= $requiredLevel) {
             return true;
         }
         return false;
@@ -62,7 +56,7 @@ class Session
     private function validate(array $post, array $useArray): void
     {
         $validateArray = array(
-            'email' => array(
+            'level' => array(
                 'required' => true,
             ),
             'idUser' => array(

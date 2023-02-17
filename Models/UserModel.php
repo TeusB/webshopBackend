@@ -137,4 +137,5 @@ class UserModel extends Model
             $this->error->maakError("validation");
         }
     }
+
 }

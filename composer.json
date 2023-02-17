@@ -1,0 +1,12 @@
+{
+  "name": "vendor_name/webshop",
+  "description": "description",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "senne",
+      "email": "email@example.com"
+    }
+  ]
+}

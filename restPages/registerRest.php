@@ -5,20 +5,23 @@ require_once("../vendor/autoload.php");
 use controllers\User;
 use main\Error;
 use main\Session;
-use models\shoppingCartModel;
+use controllers\ShoppingCart;
 
 $error = new Error("register Rest");
 
 try {
     $user = new User();
-    $shoppingCart = new shoppingCartModel();
+    $shoppingCart = new ShoppingCart();
     $session = new Session();
     switch ($value = $_SERVER["REQUEST_METHOD"]) {
         case "POST":
             if (!$user->checkEmailExist($_POST)) {
                 $user->registerUser($_POST);
                 $id = $user->returnLastID();
+                $level = $user->getLevelById(["idUser" => $id]);
                 $shoppingCart->createShoppingCart($id);
+                $session->createLevelSession(array('Level' => $level));
+                $session->createUserSession(array('idUser' => $id));
                 echo json_encode([
                     "succes" => "link",
                     "link" => "index.php"

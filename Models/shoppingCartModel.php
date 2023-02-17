@@ -16,10 +16,55 @@ class shoppingCartModel extends Model
     protected array $validatedArray = array();
 
 
-    public function createShoppingCart($ID): bool
+    public function validateDataGet(array $post, array $useArray): void
     {
-        return $this->insert(array(
-            "idUser" => $ID,
-        ));
+        $validateArray = array(
+            'idShoppingCart' => array(
+                'required' => true,
+                'onlyDigit' => true,
+            ),
+            'idUser' => array(
+                'required' => true,
+                'onlyDigit' => true,
+            )
+        );
+
+        $useArray = array_flip($useArray);
+
+        $validationArray = $this->validate->getValidationArray($validateArray, $useArray);
+        $this->validate->checkValidation($post, $validationArray);
+
+        if ($this->validate->checkErrorsValidate()) {
+            $this->validatedArray = $this->validate->getValidatedArray($post, $validationArray);
+        } else {
+            $this->error->log->error($this->validate->returnErrorValidate());
+            $this->error->maakError("something went wrong with the validation");
+        }
     }
+
+    public function validateDataInput(array $post, array $useArray): void
+    {
+        $validateArray = array(
+            'idShoppingCart' => array(
+                'required' => true,
+                'onlyDigit' => true,
+            ),
+            'idUser' => array(
+                'required' => true,
+                'onlyDigit' => true,
+            )
+        );
+        $useArray = array_flip($useArray);
+
+        $validationArray = $this->validate->getValidationArray($validateArray, $useArray);
+        $this->validate->checkValidation($post, $validationArray);
+
+        if ($this->validate->checkErrorsValidate()) {
+            $this->validatedArray = $this->validate->getValidatedArray($post, $validationArray);
+        } else {
+            $this->error->log->error($this->validate->returnErrorValidate());
+            $this->error->maakError("something went wrong with the validation");
+        }
+    }
+
 }

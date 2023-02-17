@@ -139,4 +139,5 @@ class UserModel extends Model
             $this->error->maakError("something went wrong with the validation");
         }
     }
+
 }

@@ -1,12 +1,14 @@
 {
-  "name": "vendor_name/webshop",
-  "description": "description",
-  "minimum-stability": "stable",
-  "license": "proprietary",
-  "authors": [
-    {
-      "name": "senne",
-      "email": "email@example.com"
+  "autoload": {
+    "psr-4": {
+      "main\\": "Classes",
+      "models\\": "Models",
+      "controllers\\": "Controllers"
     }
-  ]
+  },
+  "require": {
+    "monolog/monolog": "^3.2",
+    "vlucas/phpdotenv": "^5.5",
+    "phpmailer/phpmailer": "^6.6"
+  }
 }

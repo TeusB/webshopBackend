@@ -1,191 +1,173 @@
 <?php
 
-namespace webshop;
+namespace controllers;
 
-class User extends AbstractView
+use main\Error;
+use models\UserModel;
+use main\Mailer;
+
+class User extends UserModel
 {
-    private $u_model;
-    public $validate;
-    private $error;
+    private object $error;
 
     public function __construct()
     {
-        session_start();
-        $this->u_model = new User_Model();
-        $this->error = new Error("User");
-        $this->validate = new Validate();
+        parent::__construct();
+        $this->error = new Error("User Controller");
     }
 
-    public function UserErrorLog(string $messages): void
+    public function getNameById(array $post): string|false
     {
-        $this->error->logError($messages);
+        $useArray = array("idUser");
+        $this->validateDataGet($post, $useArray);
+        $this->get(array("firstName"), array("idUser" => $this->validatedArray["idUser"]));
+        if ($this->checkFetch()) {
+            return $this->fetchRow()["firstName"];
+        }
+        return false;
     }
 
-
-    public function validateInputLogin(array $POST): bool
+    public function registerUser(array $post): void
     {
-        $this->validate->check($POST, array(
-            'email' => array(
-                'required' => true,
-            ),
-            'password' => array(
-                'required' => true,
-            ),
+        $useArray = array("email", "password", "confirmPassword");
+        $this->validateDataInput($post, $useArray);
+        $this->validatedArray["password"] = $this->hashPassword($this->validatedArray["password"]);
+        $this->insert(array(
+            "email" => $this->validatedArray["email"],
+            "password" => $this->validatedArray["password"],
         ));
-        return $this->validate->checkErrorsValidate();
     }
 
-
-    public function validateInputRegister(array $POST): bool
+    public function checkEmailExist(array $post): bool
     {
-        $this->validate->check($POST, array(
-            'email' => array(
-                'required' => true,
-                'email' => true,
-            ),
-            'password' => array(
-                'required' => true,
-                'max' => 254,
-                'min' => 6,
-                'uppercase' => true,
-                'lowercase' => true,
-                'symbol' => true,
-                'digit' => true,
-            ),
-            'confirmPassword' => array(
-                'required' => true,
-                'matches' => $_POST["password"],
-            ),
+        $useArray = array("email");
+        $this->validateDataGet($post, $useArray);
+        return $this->checkExist(array("email" => $this->validatedArray["email"]));
+    }
+
+    public function confirmAccount(array $post): void
+    {
+        $useArray = array("idUser");
+        $this->validateDataInput($post, $useArray);
+        $this->update(array(
+            "accountStatus" => 1,
+        ), array(
+            "idUser" => $this->validatedArray["idUser"],
         ));
-        return $this->validate->checkErrorsValidate();
     }
 
 
-
-
-    public function login(string $email, string $password): bool
+    public function getIdByEmail(array $post): int
     {
-        if (password_verify($password, $this->u_model->getPassword($email))) {
-            return true;
-        }
-        return false;
-    }
-
-
-    public function checkEmailExist(string $email): bool
-    {
-        if ($this->u_model->getId($email)) {
-            return true;
-        }
-        return false;
-    }
-
-
-    public function returnID(string $email)
-    {
-        if ($idUser = $this->u_model->getId($email)) {
-            return $idUser;
-        }
-        return false;
-    }
-
-    public function returnEmail(int $idUser)
-    {
-        if ($email = $this->u_model->getEmail($idUser)) {
-            return $email;
-        }
-        return false;
-    }
-
-
-    public function register(string $email, string $password): int
-    {
-        return $this->u_model->insertUser($email, password_hash($password, PASSWORD_DEFAULT));
-    }
-
-    public function getLevel(int $idUser): int
-    {
-        return $this->u_model->getLevel($idUser);
-    }
-
-    public function setSession(int $idUser, int $level): void
-    {
-        $_SESSION["idUser"] = $idUser;
-        $_SESSION["level"] = $level;
-    }
-
-    public function unsetSession(): void
-    {
-        session_destroy();
-    }
-
-    public function getLevelLink(int $level): string
-    {
-        switch ($level) {
-            case 1:
-                $link = "index.php?c=user&m=loadShop";
-                break;
-            case 2:
-                $link = "index.php?c=product&m=loadProductsPage";
-                break;
-            default:
-                $this->unsetSession();
-                $this->error->maakError("kon geen valid level vinden");
-                break;
-        }
-        return $link;
-    }
-
-
-    public function updateUser()
-    {
-        if ($this->u_model->updateUser($_POST["firstName"], $_POST["lastName"], $_POST["email"], $_GET["idUser"])) {
-            echo "user is succesvol gewijzigd";
+        $useArray = array("email");
+        $this->validateDataGet($post, $useArray);
+        $this->get(array("idUser"), array("email" => $this->validatedArray["email"]));
+        if ($this->checkFetch()) {
+            return $this->fetchRow()["idUser"];
         } else {
-            echo "kon user niet wijzigen";
+            $this->error->maakError("email does not exist");
         }
     }
 
-    public function deleteUser()
+    public function checkStatus(array $post): bool
     {
-        if ($this->u_model->deleteUser($_GET["idUser"])) {
-            echo "user verwijderd";
+        $useArray = array("email");
+        $this->validateDataGet($post, $useArray);
+        $this->get(array("accountStatus"), array("email" => $this->validatedArray["email"]));
+        if ($this->checkFetch()) {
+            if ($this->fetchRow()["accountStatus"] === 0) {
+                return true;
+            }
+            return false;
         } else {
-            echo "kon user niet verwijderen";
+            $this->error->maakError("email does not exist");
         }
     }
 
-    public function loadLoginPage()
+    public function updatePassword(array $post)
     {
-        $emptyArray = array();
-        $this->showView('login', $emptyArray);
+        $useArray = array("idUser", "password", "confirmPassword");
+        $this->validateDataInput($post, $useArray);
+        $this->validatedArray["password"] = $this->hashPassword($this->validatedArray["password"]);
+        $this->update(array(
+            "password" =>  $this->validatedArray["password"],
+        ), array(
+            "idUser" => $this->validatedArray["idUser"],
+        ));
     }
 
-    public function loadRegisterPage()
+
+    public function getEmailById(array $post)
     {
-        $emptyArray = array();
-        $this->showView('register', $emptyArray);
+        $useArray = array("idUser");
+        $this->validateDataGet($post, $useArray);
+        $this->get(array("email"), array("idUser" => $this->validatedArray["idUser"]));
+        if ($this->checkFetch()) {
+            return $this->fetchRow()["email"];
+        }
+        return false;
     }
 
-    public function loadAdminPage()
+    public function checkVerified(array $post): bool
     {
-        $emptyArray = array();
-        $this->showView('adminPannel', $emptyArray);
+        $postArray = array("idUser");
+        $this->validateDataInput($post, $postArray);
+        return $this->checkExist(array("idUser" => $this->validatedArray["idUser"], "accountStatus" => 0));
     }
 
-    public function loadUserPage()
+    public function getPassword(array $post): string
     {
-        $this->showView('users', ['users' => $this->u_model->listUsers()]);
+        $useArray = array("email");
+        $this->validateDataGet($post, $useArray);
+        $this->get(array("password"), array("email" => $this->validatedArray["email"]));
+        if ($this->checkFetch()) {
+            return $this->fetchRow()["password"];
+        } else {
+            $this->error->maakError("Email is not registered");
+        }
     }
 
-    public function loadShop()
+
+    public function sendConfirmEmail(array $post, string $token)
     {
-        new Shop();
+        $useArray = array("email");
+        $this->validateDataInput($post, $useArray);
+        $this->get(array("firstName", "lastName"), array("email" => $this->validatedArray["email"]));
+        if ($this->checkFetch()) {
+            $fetchedArray = $this->fetchRow();
+            ob_start();
+            include("../Emails/confirmEmail.php");
+            $email = ob_get_contents();
+            ob_end_clean();
+            new Mailer($this->validatedArray["email"], $fetchedArray["firstName"] . " " . $fetchedArray["lastName"], "confirm email", $email);
+        }
     }
 
-    public function logOut()
+    public function sendResetPasswordEmail(array $post, string $token)
     {
-        session_unset();
-        new Shop();
+        $useArray = array("email");
+        $this->validateDataInput($post, $useArray);
+        $this->get(array("firstName", "lastName"), array("email" => $this->validatedArray["email"]));
+        if ($this->checkFetch()) {
+            $fetchedArray = $this->fetchRow();
+            ob_start();
+            include("../Emails/forgotPasswordEmail.php");
+            $email = ob_get_contents();
+            ob_end_clean();
+            new Mailer($this->validatedArray["email"], $fetchedArray["firstName"] . " " . $fetchedArray["lastName"], "reset Password", $email);
+        }
+    }
+
+
+    private function hashPassword(string $password): string
+    {
+        return password_hash($password, PASSWORD_DEFAULT);
+    }
+
+    public function validatePassword(array $post, string $storedPassword): bool
+    {
+        $useArray = array("password");
+        $this->validateDataGet($post, $useArray);
+        return password_verify($this->validatedArray["password"], $storedPassword);
     }
 }

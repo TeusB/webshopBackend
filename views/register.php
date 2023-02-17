@@ -41,7 +41,7 @@
         function sendDatePost(email, password, confirmPassword) {
             $.ajax({
                 method: "POST",
-                url: "restRegister.php",
+                url: "../restPages/registerRest.php",
                 data: {
                     email: email,
                     password: password,
@@ -51,7 +51,7 @@
                     console.log(data);
                     let parsedData = JSON.parse(data);
                     switch (parsedData["succes"]) {
-                        case "fout":
+                        case "error":
                             $(messages).html(createErrorDiv(parsedData["msg"]));
 
                             break;

@@ -1,28 +1,25 @@
 <?php
 
-namespace webshop;
+namespace main;
 
 use Exception;
-use DateTime;
-use DateTimeZone;
+use Monolog\Level;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
 class Error
 {
-    public $errors = array();
-    private $errorPage;
+    public object $log;
+    public array $errors = array();
+    public string $rootDir;
 
     //sets path to errorlog
-    public function __construct(string $errorPage)
+    public function __construct(string $class)
     {
-        $this->errorPage = $errorPage;
-    }
-
-    public function logError(string $error, string $file = "error.log")
-    {
-        $datetime = new DateTime();
-        $datetime->setTimezone(new DateTimeZone('UTC'));
-        $logEntry = $datetime->format('Y/m/d H:i:s') . " " . $this->errorPage . ' ' . $error . "\n";
-        error_log($logEntry, 3, $file);
+        $this->rootDir = realpath($_SERVER["DOCUMENT_ROOT"]);
+        $path = $this->rootDir . "/error.log";
+        $this->log = new Logger($class);
+        $this->log->pushHandler(new StreamHandler($path, Level::Warning));
     }
 
     //create exception

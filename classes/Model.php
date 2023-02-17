@@ -1,151 +1,186 @@
 <?php
 
-namespace webshop;
+namespace main;
 
-use Exception;
+use main\DataBase;
 
-class Model
+class Model extends DataBase
 {
-    protected $DB;
-    private $error;
+    private object $stmt;
+    private object $error;
+    private $result;
+    private object $mysqli;
 
+    //gets database connection
     public function __construct()
     {
-        $DB = DB::getInstance('mysql', 'root', 'root', 'webshop');
-        $this->DB = $DB->getConnection();
-        mysqli_report(MYSQLI_REPORT_ALL ^ MYSQLI_REPORT_INDEX);
-        $this->error = new Error("Model Class");
+        parent::__construct();
+        $this->error = new Error("Model");
+        $this->mysqli = $this->createConnection();
     }
 
-    private function prepare(string $sql)
+
+    private function prepareStmt($query, string $paraString, array $bindColumns): bool
     {
-        try {
-            $stmt = $this->DB->prepare($sql);
-        } catch (Exception $e) {
-            $this->error->logError($e->getMessage());
-            $this->error->maakError("kon query niet uitvoeren");
+        $this->stmt = $this->mysqli->prepare($query);
+        $this->stmt->bind_param($paraString, ...$bindColumns);
+        if ($this->stmt->execute()) {
+            return true;
         }
-        return $stmt;
+        $this->error->maakError("kon query niet uitvoeren");
+    }
+    // //get by id
+    // public function getByID(array $fetchColumns): bool
+    // {
+    // }
+
+    //get data from database
+    public function get(array $fetchColumns, array $identifiers): bool
+    {
+        $stringColumns = implode(", ", $fetchColumns);
+        $identifierColumns = array_keys($identifiers);
+        $valuesColumnsIdentifiers = array_values($identifiers);
+        $stringIdentifiers = implode(" = ? AND ", $identifierColumns);
+        $stringIdentifiers .= " = ?";
+        $query = "SELECT $stringColumns FROM $this->tableName WHERE $stringIdentifiers";
+        $paraString = $this->createParaString($valuesColumnsIdentifiers);
+        return $this->prepareStmt($query, $paraString, $valuesColumnsIdentifiers);
     }
 
-    private function stmtHandler(string $sql, $values, string $params)
+
+    public function getOr(array $fetchColumns, array $identifiers): bool
     {
-        if (is_string($values)) {
-            $values = ["$values"];
+        $stringColumns = implode(", ", $fetchColumns);
+        $identifierColumns = array_keys($identifiers);
+        $valuesColumnsIdentifiers = array_values($identifiers);
+        $stringIdentifiers = implode(" = ? OR ", $identifierColumns);
+        $stringIdentifiers .= " = ?";
+        $query = "SELECT $stringColumns FROM $this->tableName WHERE $stringIdentifiers";
+        $paraString = $this->createParaString($valuesColumnsIdentifiers);
+        return $this->prepareStmt($query, $paraString, $valuesColumnsIdentifiers);
+    }
+
+    // //get all data from a table
+    // public function getAll(string $tableName): bool
+    // {
+    // }
+
+    //update columns
+    public function update(array $updateColumns, array $identifiers): bool
+    {
+        $columns = array_keys($updateColumns);
+        $valuesColumns = array_values($updateColumns);
+        $stringColumns = implode(" = ?, ", $columns);
+        $stringColumns .= " = ?";
+
+        $identifierColumns = array_keys($identifiers);
+        $valuesColumnsIdentifiers = array_values($identifiers);
+        $stringIdentifiers = implode(" = ? AND ", $identifierColumns);
+        $stringIdentifiers .= " = ?";
+
+        $query = "UPDATE $this->tableName SET $stringColumns WHERE $stringIdentifiers";
+        $arrayMerge = array_merge($valuesColumns, $valuesColumnsIdentifiers);
+        $paraString = $this->createParaString($arrayMerge);
+        return $this->prepareStmt($query, $paraString, $arrayMerge);
+    }
+
+
+
+
+    //delete
+    public function delete(array $identifiers): bool
+    {
+        $identifierColumns = array_keys($identifiers);
+        $valuesColumnsIdentifiers = array_values($identifiers);
+        $stringIdentifiers = implode(" = ? AND ", $identifierColumns);
+        $stringIdentifiers .= " = ?";
+        $query = "DELETE FROM $this->tableName WHERE $stringIdentifiers";
+        $paraString = $this->createParaString($valuesColumnsIdentifiers);
+        return $this->prepareStmt($query, $paraString, $valuesColumnsIdentifiers);
+    }
+
+    //inserts into database
+    public function insert(array $insertColumns): bool
+    {
+        $keysArray = array_keys($insertColumns);
+        $valuesArray = array_values($insertColumns);
+        $stringColumns = implode(", ", $keysArray);
+
+        $questionMarks = "";
+        foreach ($valuesArray as $value) {
+            $questionMarks .= ", ?";
         }
-        $stmt = $this->prepare($sql);
-        try {
-            $stmt->bind_param($params, ...$values);
-            if ($stmt->execute()) {
-                return $stmt->get_result();
-            }
+        $questionMarks = substr($questionMarks, 2);
+
+        $query = "INSERT INTO $this->tableName ($stringColumns) VALUES ($questionMarks)";
+        $paraString = $this->createParaString($valuesArray);
+        return $this->prepareStmt($query, $paraString, $valuesArray);
+    }
+
+    //checks if there is any data to be fetched
+    public function checkFetch(): bool
+    {
+        $this->result = $this->stmt->get_result();
+        if ($this->result->num_rows === 0) {
             return false;
-        } catch (Exception $e) {
-            $this->error->logError($e->getMessage());
-            $this->error->maakError("query niet uitgevoerd");
+        }
+        return true;
+    }
+
+    //returns array of fetched data
+    public function fetch(): array
+    {
+        return $this->result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function fetchRow(): array
+    {
+        return $this->result->fetch_all(MYSQLI_ASSOC)[0];
+    }
+
+    //returns last id
+    public function returnLastID(): string|int
+    {
+        return $this->mysqli->insert_id;
+    }
+
+    public function checkExist(array $identifiers): bool
+    {
+        $identifierColumns = array_keys($identifiers);
+        $valuesColumnsIdentifiers = array_values($identifiers);
+        $stringIdentifiers = implode(" = ? AND ", $identifierColumns);
+        $stringIdentifiers .= " = ?";
+        $query = "SELECT $this->identifierColumn FROM $this->tableName WHERE $stringIdentifiers";
+        $paraString = $this->createParaString($valuesColumnsIdentifiers);
+        if ($this->prepareStmt($query, $paraString, $valuesColumnsIdentifiers)) {
+            return $this->checkFetch();
         }
     }
 
-    private function stmtHandlerCheck(string $sql, $values, string $params): bool
+    //cheks the type of a variable and puts the binding letter in paraType
+    private function createParaString(array $valuesArray): string
     {
-        if (is_string($values)) {
-            $values = ["$values"];
-        }
-
-        $stmt = $this->prepare($sql);
-        $stmt->bind_param($params, ...$values);
-        if ($stmt->execute()) {
-            return true;
-        }
-        return false;
-    }
-
-    private function stmtHandlerEmpty(string $sql)
-    {
-        $stmt = $this->prepare($sql);
-        try {
-            if ($stmt->execute()) {
-                return $stmt->get_result();
-            }
-        } catch (Exception $e) {
-            $this->error->logError($e->getMessage);
-            $this->error->maakError("query niet uitgevoerd");
-        }
-    }
-
-    protected function selectEmpty(string $sql)
-    {
-        if ($result = $this->stmtHandlerEmpty($sql)) {
-            if ($result->num_rows === 0) {
-                return false;
-            } else {
-                return $result->fetch_all(MYSQLI_ASSOC);
-            }
-        }
-        return false;
-    }
-
-
-    protected function select(string $sql, $values, string $params)
-    {
-        if ($result = $this->stmtHandler($sql, $values, $params)) {
-            if ($result->num_rows !== 0) {
-                return $result->fetch_all(MYSQLI_ASSOC);
-            }
-        }
-        return false;
-    }
-
-
-    protected function selectBool(string $sql, $values, string $params): bool
-    {
-        if ($result = $this->stmtHandler($sql, $values, $params)) {
-            if ($result->num_rows !== 0) {
-                return true;
+        $paraString = "";
+        foreach ($valuesArray as $value) {
+            $value = getType($value);
+            switch ($value) {
+                case "string":
+                    $paraString .= "s";
+                    break;
+                case "integer":
+                    $paraString .= "i";
+                    break;
+                case "double":
+                    $paraString .= "d";
+                    break;
+                case "blob":
+                    $paraString .= "b";
+                    break;
+                default:
+                    $this->error->log->error("unknown paratype " . $value);
+                    $this->error->maakError("ongeldige invoer gegevens");
             }
         }
-        return false;
-    }
-
-    protected function insert(string $sql, $values, string $params): bool
-    {
-        if ($this->stmtHandlerCheck($sql, $values, $params)) {
-            return true;
-        }
-        return false;
-    }
-
-    protected function insertReturnID(string $sql, $values, string $params)
-    {
-        $this->stmtHandler($sql, $values, $params);
-        return $this->DB->insert_id;
-    }
-
-    protected function update(string $sql, $values, string $params)
-    {
-        if ($this->stmtHandlerCheck($sql, $values, $params)) {
-            return true;
-        }
-        return false;
-    }
-
-    protected function delete(string $sql, $values, string $params)
-    {
-        if ($this->stmtHandlerCheck($sql, $values, $params)) {
-            return true;
-        }
-        return false;
-    }
-
-    protected function returnSingleValue(array $values)
-    {
-        foreach ($values[0] as $value) {
-            return $value;
-        }
-    }
-
-    protected function makeInt(string $value): int
-    {
-        return intval($value);
+        return $paraString;
     }
 }

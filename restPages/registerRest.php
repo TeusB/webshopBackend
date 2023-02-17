@@ -23,14 +23,14 @@ try {
                 return;
             } else {
                 echo json_encode([
-                    "succes" => "fout",
+                    "succes" => "error",
                     "msg" => "email already exists"
                 ]);
             }
             return;
         default:
             echo json_encode([
-                "succes" => "fout",
+                "succes" => "error",
                 "msg" => "kon geen request vinden"
             ]);
             return;

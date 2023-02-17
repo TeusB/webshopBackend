@@ -127,6 +127,18 @@ class User extends UserModel
         }
     }
 
+    public function getLevelById(array $post): int
+    {
+        $useArray = array("idUser");
+        $this->validateDataGet($post, $useArray);
+        $this->get(array("level"), array("idUser" => $this->validatedArray["idUser"]));
+        if ($this->checkFetch()) {
+            return $this->fetchRow()["level"];
+        } else {
+            $this->error->maakError("account heeft geen levels");
+        }
+    }
+
 
     public function sendConfirmEmail(array $post, string $token)
     {

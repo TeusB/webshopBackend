@@ -16,6 +16,9 @@ try {
             $dbPassword = $user->getPassword($_POST);
             if ($user->validatePassword($_POST, $dbPassword)) {
                 $idUser = $user->getIdByEmail($_POST);
+                $level = $user->getLevelById(["idUser" => $idUser]);
+                $session->createUserSession(["idUser" => $idUser]);
+                $session->createLevelSession(["level" => $level]);
                 echo json_encode([
                     "succes" => "succes",
                     "msg" => "You can login",

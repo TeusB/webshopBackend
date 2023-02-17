@@ -4,3 +4,8 @@
 [2023-02-17T11:31:57.913502+01:00] register Rest.ERROR: validation [] []
 [2023-02-17T11:32:03.608546+01:00] register Rest.ERROR: validation [] []
 [2023-02-17T11:32:08.887458+01:00] register Rest.ERROR: validation [] []
+[2023-02-17T11:39:53.587284+01:00] register Rest.ERROR: validation [] []
+[2023-02-17T11:40:01.517311+01:00] register Rest.ERROR: validation [] []
+[2023-02-17T11:40:14.522111+01:00] register Rest.ERROR: validation [] []
+[2023-02-17T11:40:21.040273+01:00] register Rest.ERROR: validation [] []
+[2023-02-17T11:41:20.681499+01:00] login Rest.ERROR: Email is not registered [] []

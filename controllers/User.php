@@ -5,7 +5,6 @@ namespace controllers;
 use main\Error;
 use models\UserModel;
 use main\Mailer;
-use models\shoppingCartModel;
 
 class User extends UserModel
 {

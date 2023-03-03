@@ -9,7 +9,7 @@ use controllers\Category;
 
 $product = new Product();
 $category = new Category();
-$getProduct = $product->getProductByQuery(1);
+$getProduct = $product->getProductJoinCategory(1);
 $getCategories = $category->getAllCategories(["idCategory", "name"]);
 ?>
 <html lang="en">
@@ -36,7 +36,7 @@ $getCategories = $category->getAllCategories(["idCategory", "name"]);
             <input type="number" name="idProduct" style="display: none;" value="<?php echo $getProduct["idProduct"]; ?>">
 
             <label>product Name</label>
-            <input type="text" name="name" value="<?php echo $getProduct["name"]; ?>">
+            <input type="text" name="name" value="<?php echo $getProduct["productName"]; ?>">
 
             <label>description</label>
             <input type="text" name="descr" value="<?php echo $getProduct["descr"]; ?>">
@@ -77,24 +77,21 @@ $getCategories = $category->getAllCategories(["idCategory", "name"]);
         const messages = document.getElementById('messages');
         const updateButton = document.querySelector('.update');
 
-
         updateButton.addEventListener('click', function handleClick(event) {
             let form = updateButton.form;
             let name = form.elements["name"].value;
             let descr = form.elements["descr"].value;
             let idCategory = form.elements["idCategory"].value;
-            console.log(idCategory);
             let price = form.elements["price"].value;
             let stock = form.elements["stock"].value;
             let idProduct = form.elements["idProduct"].value;
-            console.log(idCategory);
             sendDataPut(idProduct, name, descr, idCategory, price, stock, messages);
         });
 
         function sendDataPut(idProduct, name, descr, idCategory, price, stock, messages) {
             $.ajax({
                 method: "PUT",
-                url: "restProduct.php",
+                url: "../restPages/restProduct.php",
                 data: {
                     name: name,
                     descr: descr,
@@ -104,10 +101,10 @@ $getCategories = $category->getAllCategories(["idCategory", "name"]);
                     stock: stock
                 },
                 success: function(data) {
-
+                    console.log(data);
                     let parsedData = JSON.parse(data);
                     switch (parsedData["succes"]) {
-                        case "fout":
+                        case "error":
                             $(messages).html(createErrorDiv(parsedData["msg"]));
 
                             break;

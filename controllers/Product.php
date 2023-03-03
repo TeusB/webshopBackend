@@ -26,12 +26,24 @@ class Product extends ProductModel
         return false;
     }
 
-    public function getProductByQuery($idProduct): array|false
+    public function getProductJoinCategory($idProduct): array|false
     {
-        $this->getHandler("SELECT Product.idProduct, Product.name, Product.descr, Product.price, Product.stock, category.idCategory, category.name FROM Product LEFT JOIN category ON category.idCategory = product.idCategory WHERE product.idProduct = ?;", [$idProduct]);
+        $this->getHandler("SELECT Product.idProduct, Product.name AS productName, Product.descr, Product.price, Product.stock, category.idCategory, category.name AS categoryName FROM Product LEFT JOIN category ON category.idCategory = product.idCategory WHERE product.idProduct = ?;", [$idProduct]);
         if ($this->checkFetch()) {
             return $this->fetchRow();
         }
         return false;
+    }
+
+    public function updateProduct(array $put)
+    {
+        $useArray = array("idProduct", "name", "descr");
+        $this->validateDataInput($put, $useArray);
+        return $this->update(array(
+            "name" =>  $this->validatedArray["name"],
+            "descr" => $this->validatedArray["descr"],
+        ), array(
+            "idProduct" => $this->validatedArray["idProduct"],
+        ));
     }
 }

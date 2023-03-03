@@ -81,7 +81,7 @@ class Model extends DataBase
     }
 
     //update columns
-    public function update(array $updateColumns, array $identifiers): bool
+    public function update(array $updateColumns, array $identifiers)
     {
         $columns = array_keys($updateColumns);
         $valuesColumns = array_values($updateColumns);

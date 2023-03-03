@@ -24,3 +24,7 @@
 [2023-03-03T08:45:26.753476+01:00] login Rest.ERROR: something went wrong with the validation [] []
 [2023-03-03T08:45:45.351214+01:00] User Model.ERROR: email can not be empty [] []
 [2023-03-03T08:45:45.377891+01:00] register Rest.ERROR: something went wrong with the validation [] []
+[2023-03-03T10:33:00.684125+01:00] Product Model.ERROR: name can not be empty [] []
+[2023-03-03T10:33:00.691155+01:00] login Rest.ERROR: something went wrong with the validation [] []
+[2023-03-03T10:33:26.617725+01:00] Product Model.ERROR: descr can not be empty [] []
+[2023-03-03T10:33:26.622516+01:00] login Rest.ERROR: something went wrong with the validation [] []

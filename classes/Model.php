@@ -68,10 +68,17 @@ class Model extends DataBase
         return $this->prepareStmt($query, $paraString, $values);
     }
 
-    // //get all data from a table
-    // public function getAll(string $tableName): bool
-    // {
-    // }
+    //get all data from a table
+    public function getAll(array $fetchColumns): bool
+    {
+        $stringColumns = implode(", ", $fetchColumns);
+        $query = "SELECT $stringColumns FROM $this->tableName";
+        $this->stmt = $this->mysqli->prepare($query);
+        if ($this->stmt->execute()) {
+            return true;
+        }
+        $this->error->maakError("kon query niet uitvoeren");
+    }
 
     //update columns
     public function update(array $updateColumns, array $identifiers): bool

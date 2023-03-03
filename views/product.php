@@ -5,13 +5,12 @@ use controllers\User;
 use main\Error;
 use main\Session;
 use controllers\Product;
+use controllers\Category;
 
 $product = new Product();
-// $getProduct = $product->getProductByID(["idProduct" => 1]);
-// var_dump($getProduct);
-
-$getProduct2 = $product->getProductByQuery();
-var_dump($getProduct2);
+$category = new Category();
+$getProduct = $product->getProductByQuery(1);
+$getCategories = $category->getAllCategories(["idCategory", "name"]);
 ?>
 <html lang="en">
 
@@ -44,7 +43,17 @@ var_dump($getProduct2);
 
             <label>category</label>
             <select name="idCategory" required>
-
+                <?php
+                if (!empty($getCategories)) {
+                    foreach ($getCategories as $categoryL) {
+                ?>
+                        <option <?php if ($categoryL["idCategory"] === $getProduct["idCategory"]) {
+                                    echo "selected";
+                                } ?> value="<?php echo $categoryL["idCategory"]; ?>"><?php echo $categoryL["name"]; ?></option>
+                <?php
+                    }
+                }
+                ?>
             </select>
 
             <label>price</label>

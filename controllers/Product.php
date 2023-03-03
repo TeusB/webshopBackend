@@ -26,9 +26,9 @@ class Product extends ProductModel
         return false;
     }
 
-    public function getProductByQuery(): array|false
+    public function getProductByQuery($idProduct): array|false
     {
-        $this->getHandler("SELECT Product.idProduct, Product.name, Product.descr, Product.price, Product.stock, category.name FROM Product LEFT JOIN category ON category.idCategory = product.idCategory WHERE product.idProduct = ?;", [1]);
+        $this->getHandler("SELECT Product.idProduct, Product.name, Product.descr, Product.price, Product.stock, category.idCategory, category.name FROM Product LEFT JOIN category ON category.idCategory = product.idCategory WHERE product.idProduct = ?;", [$idProduct]);
         if ($this->checkFetch()) {
             return $this->fetchRow();
         }

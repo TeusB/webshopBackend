@@ -62,10 +62,18 @@ class Model extends DataBase
         return $this->prepareStmt($query, $paraString, $valuesColumnsIdentifiers);
     }
 
-    protected function getHandler(string $query, array $values)
+    protected function getHandler(string $query, array $values = null)
     {
-        $paraString = $this->createParaString($values);
-        return $this->prepareStmt($query, $paraString, $values);
+        if ($values) {
+            $paraString = $this->createParaString($values);
+            return $this->prepareStmt($query, $paraString, $values);
+        } else {
+            $this->stmt = $this->mysqli->prepare($query);
+            if ($this->stmt->execute()) {
+                return true;
+            }
+            $this->error->maakError("kon query niet uitvoeren");
+        }
     }
 
     //get all data from a table

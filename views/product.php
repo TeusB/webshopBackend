@@ -9,7 +9,18 @@ use controllers\Category;
 
 $product = new Product();
 $category = new Category();
-$getProduct = $product->getProductJoinCategory(1);
+$session = new Session();
+if (!$session->checkSessionExist()) {
+    echo "er is geen sessie";
+    return;
+}
+if ($session->checkSessionLevel(2)) {
+    echo "te laag level voor deze pagina";
+    return;
+}
+if (!empty($_GET["idProduct"])) {
+    $getProduct = $product->getProductJoinCategory($_GET["idProduct"]);
+}
 $getCategories = $category->getAllCategories(["idCategory", "name"]);
 ?>
 <html lang="en">
@@ -34,13 +45,10 @@ $getCategories = $category->getAllCategories(["idCategory", "name"]);
     ?>
         <form>
             <input type="number" name="idProduct" style="display: none;" value="<?php echo $getProduct["idProduct"]; ?>">
-
             <label>product Name</label>
             <input type="text" name="name" value="<?php echo $getProduct["productName"]; ?>">
-
             <label>description</label>
             <input type="text" name="descr" value="<?php echo $getProduct["descr"]; ?>">
-
             <label>category</label>
             <select name="idCategory" required>
                 <?php
@@ -55,14 +63,10 @@ $getCategories = $category->getAllCategories(["idCategory", "name"]);
                 }
                 ?>
             </select>
-
             <label>price</label>
             <input type="text" name="price" value="<?php echo $getProduct["price"]; ?>">
-
             <label>stock</label>
             <input type="text" name="stock" value="<?php echo $getProduct["stock"]; ?>">
-
-
             <button type="button" class="update" name="update">wijzig</button>
 
         </form>

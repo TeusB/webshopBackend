@@ -29,6 +29,7 @@ class Model extends DataBase
         }
         $this->error->maakError("kon query niet uitvoeren");
     }
+
     // //get by id
     // public function getByID(array $fetchColumns): bool
     // {
@@ -48,6 +49,7 @@ class Model extends DataBase
     }
 
 
+
     public function getOr(array $fetchColumns, array $identifiers): bool
     {
         $stringColumns = implode(", ", $fetchColumns);
@@ -58,6 +60,12 @@ class Model extends DataBase
         $query = "SELECT $stringColumns FROM $this->tableName WHERE $stringIdentifiers";
         $paraString = $this->createParaString($valuesColumnsIdentifiers);
         return $this->prepareStmt($query, $paraString, $valuesColumnsIdentifiers);
+    }
+
+    protected function getHandler(string $query, array $values)
+    {
+        $paraString = $this->createParaString($values);
+        return $this->prepareStmt($query, $paraString, $values);
     }
 
     // //get all data from a table

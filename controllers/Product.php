@@ -5,7 +5,7 @@ namespace controllers;
 use main\Error;
 use models\ProductModel;
 
-class User extends ProductModel
+class Product extends ProductModel
 {
     private object $error;
 
@@ -15,13 +15,22 @@ class User extends ProductModel
         $this->error = new Error("Product Controller");
     }
 
-    public function getProductByID(array $post): string|false
+    public function getProductByID(array $post): array|false
     {
         $useArray = array("idProduct");
         $this->validateDataGet($post, $useArray);
-        $this->get(array("firstName"), array("idUser" => $this->validatedArray["idUser"]));
+        $this->get(array("*"), array("idProduct" => $this->validatedArray["idProduct"]));
         if ($this->checkFetch()) {
-            return $this->fetchRow()["firstName"];
+            return $this->fetchRow();
+        }
+        return false;
+    }
+
+    public function getProductByQuery(): array|false
+    {
+        $this->getHandler("SELECT Product.idProduct, Product.name, Product.descr, Product.price, Product.stock, category.name FROM Product LEFT JOIN category ON category.idCategory = product.idCategory WHERE product.idProduct = ?;", [1]);
+        if ($this->checkFetch()) {
+            return $this->fetchRow();
         }
         return false;
     }

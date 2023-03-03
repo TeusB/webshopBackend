@@ -4,8 +4,14 @@ require_once("../vendor/autoload.php");
 use controllers\User;
 use main\Error;
 use main\Session;
-use main\Product;
+use controllers\Product;
 
+$product = new Product();
+// $getProduct = $product->getProductByID(["idProduct" => 1]);
+// var_dump($getProduct);
+
+$getProduct2 = $product->getProductByQuery();
+var_dump($getProduct2);
 ?>
 <html lang="en">
 
@@ -25,45 +31,33 @@ use main\Product;
             <p>voer een actie uit</p>
         </div>
     </div>
-    <?php if (!empty($products)) {
-        foreach ($products as $product) {
+    <?php if (!empty($getProduct)) {
     ?>
-            <form>
-                <input type="number" name="idProduct" style="display: none;" value="<?php echo $product["idProduct"]; ?>">
+        <form>
+            <input type="number" name="idProduct" style="display: none;" value="<?php echo $getProduct["idProduct"]; ?>">
 
-                <label>product Name</label>
-                <input type="text" name="name" value="<?php echo $product["name"]; ?>">
+            <label>product Name</label>
+            <input type="text" name="name" value="<?php echo $getProduct["name"]; ?>">
 
-                <label>description</label>
-                <input type="text" name="descr" value="<?php echo $product["descr"]; ?>">
+            <label>description</label>
+            <input type="text" name="descr" value="<?php echo $getProduct["descr"]; ?>">
 
-                <label>category</label>
-                <select name="idCategory" required>
-                    <?php
-                    if (!empty($categories)) {
-                        foreach ($categories as $category) {
-                    ?>
-                            <option <?php if ($category["idCategory"] === $product["idCategory"]) {
-                                        echo "selected";
-                                    } ?> value="<?php echo $category["idCategory"]; ?>"><?php echo $category["name"]; ?></option>
-                    <?php
-                        }
-                    }
-                    ?>
-                </select>
+            <label>category</label>
+            <select name="idCategory" required>
 
-                <label>price</label>
-                <input type="text" name="price" value="<?php echo $product["price"]; ?>">
+            </select>
 
-                <label>stock</label>
-                <input type="text" name="stock" value="<?php echo $product["stock"]; ?>">
+            <label>price</label>
+            <input type="text" name="price" value="<?php echo $getProduct["price"]; ?>">
+
+            <label>stock</label>
+            <input type="text" name="stock" value="<?php echo $getProduct["stock"]; ?>">
 
 
-                <button type="button" class="update" name="update">wijzig</button>
+            <button type="button" class="update" name="update">wijzig</button>
 
-            </form>
+        </form>
     <?php
-        }
     } else {
         echo "geen product gevonden";
     }

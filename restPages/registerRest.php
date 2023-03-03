@@ -20,7 +20,7 @@ try {
                 $id = $user->returnLastID();
                 $level = $user->getLevelById(["idUser" => $id]);
                 $shoppingCart->createShoppingCart($id);
-                $session->createLevelSession(array('Level' => $level));
+                $session->createLevelSession(['level' => $level]);
                 $session->createUserSession(array('idUser' => $id));
                 echo json_encode([
                     "succes" => "link",

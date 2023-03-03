@@ -1,7 +1,11 @@
 <?php
-try {
-    $sesionRequired = new \webshop\SessionRequired(2);
-    $sesionRequired->validatePage();
+require_once("../vendor/autoload.php");
+
+use controllers\User;
+use main\Error;
+use main\Session;
+use main\Product;
+
 ?>
 <html lang="en">
 
@@ -120,9 +124,3 @@ try {
 </body>
 
 </html>
-<?php 
-
-} catch (Exception $e) {
-    echo $e->getMessage();
-}
-?>

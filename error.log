@@ -196,3 +196,5 @@
 [2023-03-24T09:17:14.715529+01:00] Product Rest.ERROR: something went wrong with the validation [] []
 [2023-03-24T09:17:37.426186+01:00] Product Model.ERROR: idProduct can not be empty [] []
 [2023-03-24T09:17:37.427919+01:00] Product Rest.ERROR: something went wrong with the validation [] []
+[2023-03-24T09:26:19.383910+01:00] User Model.ERROR: password can not be empty [] []
+[2023-03-24T09:26:19.385144+01:00] login Rest.ERROR: something went wrong with the validation [] []

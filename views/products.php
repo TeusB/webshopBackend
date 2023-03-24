@@ -14,7 +14,7 @@ if (!$session->checkSessionExist()) {
     echo "er is geen sessie";
     return;
 }
-if (!$session->checkSessionLevel(1)) {
+if (!$session->checkSessionLevel(2)) {
     echo "te laag level voor deze pagina";
     return;
 }

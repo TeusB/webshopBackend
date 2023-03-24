@@ -14,7 +14,7 @@ if (!$session->checkSessionExist()) {
     echo "er is geen sessie";
     return;
 }
-if ($session->checkSessionLevel(2)) {
+if (!$session->checkSessionLevel(2)) {
     echo "te laag level voor deze pagina";
     return;
 }
@@ -43,7 +43,7 @@ $getCategories = $category->getAllCategories(["idCategory", "name"]);
     </div>
     <?php if (!empty($getProduct)) {
     ?>
-        <form>
+        <form id="data" enctype="multipart/form-data" method="post">
             <input type="number" name="idProduct" style="display: none;" value="<?php echo $getProduct["idProduct"]; ?>">
             <label>product Name</label>
             <input type="text" name="name" value="<?php echo $getProduct["productName"]; ?>">
@@ -67,8 +67,10 @@ $getCategories = $category->getAllCategories(["idCategory", "name"]);
             <input type="text" name="price" value="<?php echo $getProduct["price"]; ?>">
             <label>stock</label>
             <input type="text" name="stock" value="<?php echo $getProduct["stock"]; ?>">
-            <button type="button" class="update" name="update">wijzig</button>
-
+            <label for="imageURL">foto</label>
+            <input name="imageURL" type="file">
+            <input type="hidden" name="_method" value="PUT">
+            <input type="submit" class="update" name="update" value="wijzig">
         </form>
     <?php
     } else {
@@ -80,50 +82,32 @@ $getCategories = $category->getAllCategories(["idCategory", "name"]);
     <script>
         const messages = document.getElementById('messages');
         const updateButton = document.querySelector('.update');
+        $.ajax({
+            method: "GETJSON",
+            url: "../restPages/restProduct.php?idProduct=" + <?php echo $_GET["idProduct"]; ?>,
+            success: function(data) {
+                const jsonObject = JSON.parse(data);
+                console.log(jsonObject);
+            }
+        })
 
-        updateButton.addEventListener('click', function handleClick(event) {
-            let form = updateButton.form;
-            let name = form.elements["name"].value;
-            let descr = form.elements["descr"].value;
-            let idCategory = form.elements["idCategory"].value;
-            let price = form.elements["price"].value;
-            let stock = form.elements["stock"].value;
-            let idProduct = form.elements["idProduct"].value;
-            sendDataPut(idProduct, name, descr, idCategory, price, stock, messages);
-        });
-
-        function sendDataPut(idProduct, name, descr, idCategory, price, stock, messages) {
+        $("form#data").submit(function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
             $.ajax({
-                method: "PUT",
+                method: "POST",
                 url: "../restPages/restProduct.php",
-                data: {
-                    name: name,
-                    descr: descr,
-                    idProduct: idProduct,
-                    idCategory: idCategory,
-                    price: price,
-                    stock: stock
-                },
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function(data) {
                     console.log(data);
-                    let parsedData = JSON.parse(data);
-                    switch (parsedData["succes"]) {
-                        case "error":
-                            $(messages).html(createErrorDiv(parsedData["msg"]));
-
-                            break;
-                        case "succes":
-                            $(messages).html(createSuccesDiv(parsedData["msg"]));
-
-                            break;
-                    }
                 },
                 error: function(data) {
                     $(messages).html(createErrorDiv('er is iets mis gegaan'));
-
                 }
             });
-        }
+        })
     </script>
 </body>
 

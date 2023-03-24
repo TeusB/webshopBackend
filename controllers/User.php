@@ -56,6 +56,39 @@ class User extends UserModel
         ));
     }
 
+    public function updatePic(array $put)
+    {
+        $img_name = $_FILES['change-photo']['name'];
+        $img_size = $_FILES['change-photo']['size'];
+        $tmp_name = $_FILES['change-photo']['tmp_name'];
+        $error = $_FILES['change-photo']['error'];
+
+        if ($error === 0) {
+            if ($img_size > 1250000) {
+                $em = "Sorry, your file is too large.";
+                header("Location: index.php?error=$em");
+            } else {
+                $img_ex = pathinfo($img_name, PATHINFO_EXTENSION);
+                $img_ex_lc = strtolower($img_ex);
+
+                $allowed_exs = array("jpg", "jpeg", "png");
+
+                if (in_array($img_ex_lc, $allowed_exs)) {
+                    $new_img_name = uniqid("IMG-", true) . '.' . $img_ex_lc;
+                    $img_upload_path = '../../uploads/' . $new_img_name;
+                    move_uploaded_file($tmp_name, $img_upload_path);
+
+                    // Insert into Database
+                } else {
+                    echo json_encode([
+                        "succes" => "error",
+                        "msg" => "only upload pics: jpg, jpeg, png"
+                    ]);
+                    return;
+                }
+            }
+        }
+    }
 
     public function getIdByEmail(array $post): int
     {

@@ -11,28 +11,35 @@ $error = new Error("Product Rest");
 
 try {
     $product = new Product();
-
     switch ($value = $_SERVER["REQUEST_METHOD"]) {
         case "POST":
-            if ($product->insertProduct($_POST)) {
-                echo json_encode([
-                    "succes" => "succes",
-                    "msg" => "item is toegevoegd",
-                ]);
+            if (!empty($_POST["_method"]) && $_POST["_method"] === "PUT") {
+                $_POST = $_POST + $_FILES;
+                if ($product->updateProduct($_POST)) {
+                    echo json_encode([
+                        "succes" => "succes",
+                        "msg" => "item is geupdate"
+                    ]);
+                } else {
+                    echo json_encode([
+                        "succes" => "error",
+                        "msg" => "item is niet geupdate"
+                    ]);
+                }
             } else {
-                echo json_encode([
-                    "succes" => "error",
-                    "msg" => "item is niet toegevoegd",
-                ]);
-            }
-            break;
-        case "PUT":
-            parse_str(file_get_contents("php://input"), $_PUT);
-            if ($product->updateProduct($_PUT)) {
-                echo json_encode([
-                    "succes" => "succes",
-                    "msg" => "item is geupdate"
-                ]);
+                $_POST = $_POST + $_FILES;
+                var_dump($_POST);
+                if ($product->insertProduct($_POST)) {
+                    echo json_encode([
+                        "succes" => "succes",
+                        "msg" => "item is toegevoegd",
+                    ]);
+                } else {
+                    echo json_encode([
+                        "succes" => "error",
+                        "msg" => "item is niet toegevoegd",
+                    ]);
+                }
             }
             break;
 
@@ -51,9 +58,28 @@ try {
                 return;
             }
             break;
-        case "SOFTDELETE":
-
+        case "GETALLJSON":
+            $product->getActiveProductsJoincategoryJSON();
             return;
+        case "GETJSON":
+            $product->getProductByIDJSON($_GET);
+            return;
+        case "SOFTDELETE":
+            parse_str(file_get_contents("php://input"), $_SOFTDELETE);
+            if ($product->softDeleteProduct($_SOFTDELETE)) {
+                echo json_encode([
+                    "succes" => "succes",
+                    "msg" => "product is verwijderd",
+                ]);
+                return;
+            } else {
+                echo json_encode([
+                    "succes" => "error",
+                    "msg" => "product is niet verwijderd"
+                ]);
+                return;
+            }
+            break;
 
         default:
             echo json_encode([

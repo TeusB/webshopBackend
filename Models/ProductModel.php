@@ -47,6 +47,9 @@ class ProductModel extends Model
             'active' => array(
                 'required' => true,
             ),
+            'imageURL' => array(
+                'required' => true,
+            ),
         );
         $useArray = array_flip($useArray);
 
@@ -83,6 +86,9 @@ class ProductModel extends Model
                 'required' => true,
             ),
             'active' => array(
+                'required' => true,
+            ),
+            'imageURL' => array(
                 'required' => true,
             ),
         );

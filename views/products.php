@@ -14,12 +14,12 @@ if (!$session->checkSessionExist()) {
     echo "er is geen sessie";
     return;
 }
-if ($session->checkSessionLevel(2)) {
+if (!$session->checkSessionLevel(1)) {
     echo "te laag level voor deze pagina";
     return;
 }
 $categories = $category->getAllCategories(["idCategory", "name"]);
-$products = $product->getProductsJoincategory();
+$products = $product->getActiveProductsJoincategory();
 ?>
 <!DOCTYPE html>
 <html lang="nl">
@@ -40,7 +40,7 @@ $products = $product->getProductsJoincategory();
         </div>
     </div>
 
-    <form>
+    <form id="data" enctype="multipart/form-data" method="post">
         <label>naam Product</label>
         <input type="text" name="name" required>
 
@@ -65,8 +65,10 @@ $products = $product->getProductsJoincategory();
 
         <label>stock</label>
         <input type="number" name="stock" required>
+        <label for="imageURL">foto</label>
+        <input name="imageURL" type="file">
 
-        <button type="button" id="addProduct">voeg product toe</button>
+        <input type="submit">voeg product toe</button>
     </form>
 
     <table>
@@ -102,7 +104,7 @@ $products = $product->getProductsJoincategory();
         </tbody>
     </table>
 
-    <a href="index.php?c=user&m=logOut">logout</a>
+    <!-- <a href="index.php?c=user&m=logOut">logout</a> -->
 
     <script>
         const messages = document.getElementById("messages");
@@ -125,7 +127,7 @@ $products = $product->getProductsJoincategory();
         function sendDataDelete(idProduct, currentRow, messages) {
             $.ajax({
                 method: "SOFTDELETE",
-                url: "restProduct.php",
+                url: "../restPages/restProduct.php",
                 data: {
                     idProduct: idProduct,
                 },
@@ -164,7 +166,20 @@ $products = $product->getProductsJoincategory();
         bekijkButtons.forEach(bekijkButton => {
             addBekijkEvent(bekijkButton);
         });
+        $.ajax({
+            method: "GETALLJSON",
+            url: "../restPages/restProduct.php",
+            success: function(data) {
 
+                const jsonObject = JSON.parse(data);
+
+                console.log(jsonObject);
+                const dataArray = JSON.parse(jsonObject.data);
+
+                console.log(dataArray);
+
+            }
+        })
 
         function sendDataGet(idProduct) {
             $.ajax({
@@ -193,80 +208,25 @@ $products = $product->getProductsJoincategory();
     </script>
 
 
-    <script>
-        const addProductButton = document.getElementById('addProduct');
-        addProductButton.addEventListener('click', function handleClick(event) {
-            let form = addProductButton.form;
-            let name = form.elements["name"].value;
-            let descr = form.elements["descr"].value;
-            let categoryFix = form.elements["idCategory"];
-            let idCategory = categoryFix.value;
-            let categoryName = categoryFix.options[categoryFix.selectedIndex].text;
-            let price = form.elements["price"].value;
-            let stock = form.elements["stock"].value;
-            sendDataPost(name, descr, idCategory, categoryName, price, stock, products, messages);
-        });
-
-        function sendDataPost(name, descr, idCategory, categoryName, price, stock, products, messages) {
+    <!-- <script>
+        $("form#data").submit(function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
             $.ajax({
                 method: "POST",
                 url: "../restPages/restProduct.php",
-                data: {
-                    name: name,
-                    descr: descr,
-                    idCategory: idCategory,
-                    price: price,
-                    stock: stock,
-                },
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function(data) {
-                    let parsedData = JSON.parse(data);
-                    switch (parsedData["succes"]) {
-                        case "error":
-                            $(messages).html(createErrorDiv(parsedData["msg"]));
-
-                            break;
-                        case "succes":
-                            $(messages).html(createSuccesDiv(parsedData["msg"]));
-                            // let tr = document.createElement("tr");
-                            // let tds = [parsedData["data"], name, categoryName, price, stock];
-
-                            // tds.forEach(value => {
-                            //     let td = document.createElement("td");
-                            //     td.innerHTML = value;
-                            //     tr.append(td);
-                            // });
-
-
-                            // let buttonTD = document.createElement("td");
-
-                            // let bekijkButton = document.createElement("button");
-                            // bekijkButton.setAttribute("type", "button");
-                            // bekijkButton.innerHTML = "bekijk / wijzig";
-                            // bekijkButton.classList.add("bekijk");
-                            // addBekijkEvent(bekijkButton);
-                            // buttonTD.append(bekijkButton);
-
-
-                            // let deActivateButton = document.createElement("button");
-                            // deActivateButton.setAttribute("type", "button");
-                            // deActivateButton.innerHTML = "de activeer";
-                            // deActivateButton.classList.add("deActivate");
-                            // addDeleteEvent(deActivateButton);
-                            // buttonTD.append(deActivateButton);
-
-                            // tr.append(buttonTD);
-                            // products.prepend(tr);
-
-                            break;
-                    }
+                    console.log(data);
                 },
                 error: function(data) {
                     $(messages).html(createErrorDiv('er is iets mis gegaan'));
-
                 }
             });
-        }
-    </script>
+        })
+    </script> -->
 
 </body>
 

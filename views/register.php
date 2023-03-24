@@ -48,16 +48,15 @@
                     confirmPassword: confirmPassword,
                 },
                 success: function(data) {
-                    console.log(data);
                     let parsedData = JSON.parse(data);
+                    console.log(parsedData);
                     switch (parsedData["succes"]) {
                         case "error":
                             $(messages).html(createErrorDiv(parsedData["msg"]));
 
                             break;
-                        case "succes":
-
-                            window.location.href = parsedData["data"];
+                        case "link":
+                            window.location.href = 'shop.php';
 
                             break;
                     }

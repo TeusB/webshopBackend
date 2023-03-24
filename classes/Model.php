@@ -150,6 +150,8 @@ class Model extends DataBase
         return true;
     }
 
+
+
     //returns array of fetched data
     public function fetch(): array
     {

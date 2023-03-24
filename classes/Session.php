@@ -39,6 +39,13 @@ class Session
         return false;
     }
 
+    public function getUserSessionValues(){
+        if (isset($_SESSION['idUser']) && isset($_SESSION['level'])){
+            return ['idUser'=>$_SESSION['idUser'],'level'=>$_SESSION['level']];
+        }
+        return false;
+    }
+
     public function checkSessionLevel(int $requiredLevel): bool
     {
         if ($_SESSION["level"] >= $requiredLevel) {

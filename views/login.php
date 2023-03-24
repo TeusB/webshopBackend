@@ -54,7 +54,8 @@
 
                             break;
                         case "succes":
-                            console.log(parsedData["msg"]);
+                            window.location.href = 'shop.php';
+
                             break;
                     }
                 },
